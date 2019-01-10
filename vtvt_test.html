@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="vtvt_styles.css">
+    <script type="text/javascript" src="vtvt.js"></script>
+</head>
+<body>
+    <h3>Canvas #1</h3>
+    <div class="canvas-wrapper">
+        <canvas id='vector_canvas1' class="canvas-wrapped"></canvas>
+    </div> 
+    <h3>Canvas #2</h3>
+    <div class="canvas-wrapper">
+        <canvas id='vector_canvas2' class="canvas-wrapped"></canvas>
+    </div> 
+    <h3>Canvas #3</h3>
+    <div class="canvas-wrapper">
+        <p><button id='animation_trigger' onclick="">Press to animate power iteration</button></p>
+        <canvas id='vector_canvas3' class="canvas-wrapped"></canvas>
+    </div> 
+
+
+    <script>
+        // *************************************************************************************************	
+        
+        // initialize three canvases
+        scene1 = new vtvt("vector_canvas1", {grid_res: 16, circle_rad: 0.5, show_eig: false});
+
+        scene2 = new vtvt("vector_canvas2", {grid_res: 16, circle_rad: 0.5, show_eig: false});
+
+        scene3 = new vtvt("vector_canvas3", {grid_res: 16, circle_rad: 0.5, eig_col: "150, 150, 150", frame_duration: 500, anim_trigger_id: "animation_trigger"});
+
+    
+        //columns of matrix T
+        scene1.addVector([2, -1], {c: "70, 70, 120", selectable: true, label: "t1", visible: true});
+        scene1.addVector([-1, 3], {c: "70, 120, 70", selectable: true, label: "t2", visible: true});
+            
+        //scene2.addVector([2, -1], {c: "70, 70, 120", selectable: true, label: "t1", visible: true});
+        //scene2.addVector([-1, 3], {c: "70, 120, 70", selectable: true, label: "t2", visible: true});
+      
+        scene3.addVector([2, -1], {c: "70, 70, 120", selectable: true, label: "t1", visible: true});
+        scene3.addVector([-1, 3], {c: "70, 120, 70", selectable: true, label: "t2", visible: true});
+
+
+        scene1.addVector([-1, 3], {c: "250, 200, 200", selectable: true, label: "mapped: t1+t2", visible: true, mapping: function(){ 
+            return [scene1.vectors[0].coord_x + scene1.vectors[1].coord_x, scene1.vectors[0].coord_y + scene1.vectors[1].coord_y ];} });
+    
+        // vector + line, can be dragged    
+        scene2.addVector([5, 3], {c: "150, 200, 100", selectable: true, draw_line: true, label: "Line+arrow"});   
+        // line only, can be dragged    
+        scene2.addVector([3, 7], {c: "100, 150, 150", selectable: true, draw_line: true, draw_arrow: false, label: "no arrow"});   
+        // line only, cannot be dragged
+        scene2.addVector([-3, 4], {c: "250, 100, 250", selectable: false, draw_line: true, draw_arrow: false, label: "static line"});   
+    
+
+        //create power iteration vectors
+        scene3.addVector([-6, 1], {c: "150, 100, 100", selectable: true, label: "iter0"});
+        scene3.addAnimationFrame([-6, 1], {c: "150, 100, 100", label: "iter0", 
+            mapping: function(){ return [scene3.vectors[2].coord_x, scene3.vectors[2].coord_y]} });
+    
+        for (var k = 0; k < 6; k++) {
+            // we need to wrap the mapping function in order to copy the value of k
+            function mapping_wrapper() {
+                var i = k;
+                return function() {
+                    var x = scene3.vectors[0].coord_x * scene3.vectors_animated[i].coord_x + 
+                            scene3.vectors[1].coord_x * scene3.vectors_animated[i].coord_y;
+                    var y = scene3.vectors[0].coord_y * scene3.vectors_animated[i].coord_x + 
+                            scene3.vectors[1].coord_y * scene3.vectors_animated[i].coord_y;
+                    var norm = Math.sqrt(x*x + y*y);
+                    return [x / norm * 4, y = y / norm * 4];
+                }
+            }	
+            
+            scene3.addAnimationFrame([1, 1], {c: "150, 100, 100", label: `iter${k+1}`, draw_line: true, mapping: mapping_wrapper() });
+        }
+
+        scene1.render();	
+        scene2.render();
+        scene3.render();
+
+        // *************************************************************************************************	
+    </script>
+</body>
+</html>

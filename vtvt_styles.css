@@ -1,0 +1,47 @@
+.canvas-wrapper {
+    display: block;
+    position: relative;
+    margin-top: 1rem;
+    margin-bottom: 1rem; }
+  
+.canvas-wrapped {
+    display: block;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto; }
+    @media screen and (max-width: 42em) {
+      .canvas-wrapped {
+        max-width: 90vw;
+        max-height: 90vh; } }
+    @media screen and (min-width: 42em) and (max-width: 64em) {
+      .canvas-wrapped {
+        max-width: 75vw;
+        max-height: 75vh; } }
+    @media screen and (min-width: 64em) {
+      .canvas-wrapped {
+        max-width: 65vw;
+        max-height: 65vh; } }
+h3 {
+    text-align: center;
+    margin-bottom: 1rem; 
+}
+
+button {
+    display: block;
+    position: relative;
+    margin-left:auto;
+    margin-right:auto;
+    background-color: #FCFFFC; 
+    color: black; 
+    border: 2px solid #449980; 
+    border-radius: 5px; 
+    padding: 4px 4px;
+}
+
+button:hover {
+    background-color: #F9FFFA; 
+}
+
+button:focus {
+  outline: none;
+}

@@ -1,5 +1,5 @@
 class vtvt {
-	constructor(canvas_id, {grid_res = 14, snap_to_grid = true, circle_rad = 0.5, frame_duration = 500, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, anim_trigger_id = ''}={}) {
+	constructor(canvas_id, {grid_res = 14, snap_to_grid = true, circle_rad = 0.5, rendering_scale = 1, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
 		this.grid_res = grid_res; 					// grid units for both width and height
 		this.snap_to_grid_flag = snap_to_grid; 		// snap to gred flag
 		this.circle_rad = circle_rad;   			// clickable/touchable area of a vector
@@ -7,6 +7,7 @@ class vtvt {
 		this.show_eigenvectors_flag = show_eig;
 		this.eig_colour = eig_col;               	// eigenvector colour
 		this.eig_length = eig_length;				// eigenvector length
+		this.rendering_scale = rendering_scale;     // affects arrow size and sharpness
 
 		this.anim_trigger_id = anim_trigger_id;
 		if (this.anim_trigger_id) { 
@@ -17,19 +18,8 @@ class vtvt {
 		this.canvas = document.getElementById(canvas_id);
 		this.ctx = this.canvas.getContext("2d");
 
-		//get CSS-defined max height and width in pixels
-		this.canvasHeight = window.getComputedStyle(this.canvas).getPropertyValue('max-height').slice(0, -2);
-		this.canvasWidth  = window.getComputedStyle(this.canvas).getPropertyValue('max-width').slice(0, -2);
-
-		if (this.canvasHeight < this.canvasWidth) {
-			this.canvas.style.width = this.canvasHeight + "px";
-		} else {
-			this.canvas.style.width = this.canvasWidth + "px";
-		}	
-		this.canvas.style.height = this.canvas.style.width;
-
-		// Set actual size as per device screen density scale
-		this.scale = window.devicePixelRatio; 
+		// Set actual size as per device screen density scale times rendering_scale
+		this.scale = window.devicePixelRatio*this.rendering_scale; 
 		this.canvas.width = this.canvas.offsetWidth * this.scale;
 		this.canvas.height = this.canvas.offsetHeight * this.scale;
 		// Normalize coordinate system to use css pixels.
@@ -221,7 +211,7 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `v(λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));	
+				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));	
 			} else {
 				lambda = a/2 + d/2 + Math.sqrt(under_rad)/2;
 				eigen_x = - c / Math.sqrt((a - lambda)**2 + c*c) * this.eig_length;
@@ -230,7 +220,7 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `v(λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
+				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
 				lambda = a/2 + d/2 - Math.sqrt(under_rad)/2;		
 				eigen_x = - c / Math.sqrt((a - lambda)**2 + c*c) * this.eig_length;
 				eigen_y = eigen_x * (lambda - a) / c;
@@ -238,7 +228,7 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `v(λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
+				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
 			}
 		}
 	}
@@ -354,16 +344,16 @@ class vtvt {
 
 	onMouseDown(event) {
 		this.canvas_pos = this.canvas.getBoundingClientRect();
-		var mouseX = event.clientX - this.canvas_pos.x;
-		var mouseY = event.clientY - this.canvas_pos.y;
+		var mouseX = event.clientX - this.canvas_pos.left;
+		var mouseY = event.clientY - this.canvas_pos.top;
 		this.selectVector(mouseX, mouseY);
 	}
 
 	onTouchStart(event) {
 		event.preventDefault();
 		this.canvas_pos = this.canvas.getBoundingClientRect();
-		var touchX = event.touches[0].clientX - this.canvas_pos.x;
-		var touchY = event.touches[0].clientY - this.canvas_pos.y;
+		var touchX = event.touches[0].clientX - this.canvas_pos.left;
+		var touchY = event.touches[0].clientY - this.canvas_pos.top;
 		this.selectVector(touchX, touchY);
 	}
 
@@ -385,8 +375,8 @@ class vtvt {
 
 	onMouseMove(event) {
 		this.canvas_pos = this.canvas.getBoundingClientRect();
-		var mouseX = event.clientX - this.canvas_pos.x - this.offset_x;
-		var mouseY = event.clientY - this.canvas_pos.y - this.offset_y;
+		var mouseX = event.clientX - this.canvas_pos.left - this.offset_x;
+		var mouseY = event.clientY - this.canvas_pos.top - this.offset_y;
 		this.vectors[this.selection_index].updateCoordsOnMove(mouseX, mouseY);
 		this.render();
 	}
@@ -394,8 +384,8 @@ class vtvt {
 	onTouchMove(event) {
 		event.preventDefault();
 		this.canvas_pos = this.canvas.getBoundingClientRect();
-		var touchX = event.touches[0].clientX - this.canvas_pos.x - this.offset_x;
-		var touchY = event.touches[0].clientY - this.canvas_pos.y - this.offset_y;
+		var touchX = event.touches[0].clientX - this.canvas_pos.left - this.offset_x;
+		var touchY = event.touches[0].clientY - this.canvas_pos.top - this.offset_y;
 		this.vectors[this.selection_index].updateCoordsOnMove(touchX, touchY);
 		this.render();
 	}

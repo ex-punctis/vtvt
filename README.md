@@ -43,9 +43,9 @@ Example:
 scene = new vtvt("canvas1", {grid_res: 16, circle_rad: 0.5, show_eig: false});
 ```
 
-### Adding regular vectors/lines (not part of the animation sequence)
+### Adding regular vectors/lines (not specific to the animation sequence)
 
-To add vectors to the animation sequence use the following method:
+To add vectors that are always rendered use the following method:
 
 ```javascript
 <scene>.addVector([coord_x, coord_y], {<aethetic parameters>});
@@ -72,7 +72,9 @@ Please refer to vvt_demo.html for more examples of specifying the mapping functi
 
 Note: the first two vectors (regardless of their aesthetic parameters) created via `<scene>.addVector();` determine the columns of matrix T which is displayed on the canvas.
 
-### Adding vectors to the animation sequence
+### Adding vectors to the animated sequence
+
+Veectors from the animation sequence are rendered only once the animation is triggered. To add vectors to the animation sequence, use the following: 
 
 ```javascript
 <scene>.addAnimationFrame([coord_x, coord_y], {<aethetic parameters>});

@@ -56,8 +56,8 @@ To add vectors to the animation sequence use the following method:
 - c [default: "150, 150, 150"] — colour (RGB 0-255)
 - label [default: ''] — vector label
 - selectable [default: false] — can the object be dragged?
-— visible [default: true] — is the object visible?
-— draw_arrow [default: true] — draw the arrowhead?
+- visible [default: true] — is the object visible?
+- draw_arrow [default: true] — draw the arrowhead?
 - draw_line [default: false] — draw a line across the whole screen (as opposed to just the vector stem)?
 - mapping [default: undefined] — if you want the vector to be mapped to other vectors, specify a function returning the vector coordinates here
 

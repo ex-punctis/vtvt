@@ -33,7 +33,7 @@
         // Demo canvas #1
 
         // initialize the scene
-        scene1 = new vtvt("vector_canvas1", {grid_res: 16, circle_rad: 0.5, show_eig: false});
+        var scene1 = new vtvt("vector_canvas1", {grid_res: 16, circle_rad: 0.5, show_eig: false});
 
         // add columns of matrix T
         scene1.addVector([2, -1], {c: "70, 70, 120", selectable: true, label: "t1", visible: true});
@@ -52,7 +52,7 @@
         // Demo canvas #2
         
         // initialize the scene
-        scene2 = new vtvt("vector_canvas2", {grid_res: 16, circle_rad: 0.5, show_eig: false});
+        var scene2 = new vtvt("vector_canvas2", {grid_res: 16, circle_rad: 0.5, show_eig: false});
 
         // line only, cannot be dragged
         scene2.addVector([-5, 2], {c: "210, 100, 210", selectable: false, draw_line: true, draw_arrow: false, label: "static line"});   
@@ -72,7 +72,7 @@
         // Demo canvas #3
 
         // initialize the scene
-        scene3 = new vtvt("vector_canvas3", {grid_res: 16, circle_rad: 0.5, eig_col: "150, 150, 150", frame_duration: 500, anim_trigger_id: "animation_trigger"});
+        var scene3 = new vtvt("vector_canvas3", {grid_res: 16, circle_rad: 0.5, eig_col: "150, 150, 150", frame_duration: 500, anim_trigger_id: "animation_trigger"});
 
         // add columns of matrix T
         scene3.addVector([2, -1], {c: "70, 70, 120", selectable: true, label: "t1", visible: true});

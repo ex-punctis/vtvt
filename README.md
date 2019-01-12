@@ -59,7 +59,7 @@ To add vectors to the animation sequence use the following method:
 - visible [default: true] — is the object visible?
 - draw_arrow [default: true] — draw the arrowhead?
 - draw_line [default: false] — draw a line across the whole screen (as opposed to just the vector stem)?
-- mapping [default: undefined] — if you want the vector to be mapped to other vectors, specify a function returning the vector coordinates here
+- mapping [default: undefined] — if you want the vector to be mapped to other vectors, specify a function returning the vector coordinates here. You can access i-th vector's coordinates with `<scene>.vectors[i].coord_x` and `.coord_y` (to access vectors from the animated sequence, use `<scene>.vectors_animated[i].coord_x` and `.coord_y`)
 
 Example:
 
@@ -96,4 +96,4 @@ scene.addAnimationFrame([1, 1], {c: "150, 100, 100", label: "iter0", mapping: fu
 
 ## License and credits
 
-The source, demos and this reference are available from the [github repository](https://github.com/ex-punctis/vtvt). The code is distributed under the terms of the MIT license. Thanks to **u/senocular** and **u/theogjpeezy** from [reddit](www.reddit.com) for answering a few questions I had about js while working on **vtvt**.
+The source, demos and this reference are available from the [github repository](https://github.com/ex-punctis/vtvt). The code is distributed under the terms of the MIT license. Thanks to **u/senocular** and **u/theogjpeezy** from reddit for answering a few questions I had about js while working on **vtvt**.

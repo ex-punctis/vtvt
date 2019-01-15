@@ -1,8 +1,10 @@
+// v 1.01
 class vtvt {
-	constructor(canvas_id, {grid_res = 14, snap_to_grid = true, circle_rad = 0.5, rendering_scale = 1, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
+	constructor({canvas_id, grid_res = 14, snap_to_grid = true, circle_rad = 0.5, point_rad = 0.06, rendering_scale = 1, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
 		this.grid_res = grid_res; 					// grid units for both width and height
 		this.snap_to_grid_flag = snap_to_grid; 		// snap to gred flag
 		this.circle_rad = circle_rad;   			// clickable/touchable area of a vector
+		this.point_rad = point_rad;					// point radius
 		this.frame_duration = frame_duration;     	// time per animation frame
 		this.show_eigenvectors_flag = show_eig;
 		this.eig_colour = eig_col;               	// eigenvector colour
@@ -25,14 +27,17 @@ class vtvt {
 		// Normalize coordinate system to use css pixels.
 		this.ctx.scale(this.scale, this.scale);
 
-		this.vectors = [];          // persistent vector objects (user editable)
-		this.vectors_animated = []; // animated vector objects (user editable)
+		this.vectors = [];          // persistent vector objects (populated by user)
+		this.vectors_animated = []; // animated vector objects (populated by user)
 		this.frames_left = 0;  // animation frames left to be displayed
 		this.vectors_eigen = [];   // eigenvectors (calculated automatically)
 
 		// set vector clickable/dragable area size
 		this.circle_rad *= this.canvas.width/this.grid_res/this.scale;
 		this.circle_rad_sq = this.circle_rad**2;	
+
+		// set vector point size
+		this.point_rad *= this.canvas.width/this.grid_res/this.scale;
 		
 		// declare mouse- and touch-event variables
 		this.selection_index = undefined;
@@ -55,19 +60,51 @@ class vtvt {
 
 		// vector class
 		this.Vector = class  {
-			constructor(coords, {c="150, 150, 150", label = '', selectable = false, visible = true, draw_arrow = true, draw_line = false, mapping = undefined}={}) {
+			constructor({coords=[1,1], c="150, 150, 150", label = '', kind = 'vector', draggable = false, visible = true, draw_arrow = true, draw_point = false, draw_stem = true, draw_line = false, mapping = undefined}={}) {
 				this.coord_x = coords[0]; // virtual coordinate x (not screen position!)
 				this.coord_y = coords[1]; // virtual coordinate y (not screen position!)
 				this.line_col = "rgb(" + c + ")"; 			// vector line colour
 				this.circle_col = "rgba(" + c + ",0.1)";    // draggable area colour
-				this.mobile_flag = selectable; 				// can the vector be dragged around?
+				this.draggable = draggable; 				// can the vector be dragged around?
 				this.label = label;
 				this.visible = visible; //visibility flag
+
+				// Does the object look like vector, point, line or something else?
 				this.draw_arrow = draw_arrow; 
+				this.draw_point = draw_point;
+				this.draw_stem = draw_stem;
 				this.draw_line = draw_line;
+				this.kind = kind;
+				switch (this.kind) {
+					case 'vector':
+						this.draw_arrow = true; 
+						this.draw_point = false;
+						this.draw_stem = true;
+						this.draw_line = false;
+						break;
+					case 'point':
+						this.draw_arrow = false; 
+						this.draw_point = true;
+						this.draw_stem = false;
+						this.draw_line = false;
+						break;
+					case 'line':
+						this.draw_arrow = false; 
+						this.draw_point = false;
+						this.draw_stem = false;
+						this.draw_line = true;
+						break;
+					case 'custom':
+						break;
+					default:
+						alert(`Error! kind: '${this.kind}' is not an acceptable parameter. Please pick from 'vector', 'point', 'line', or 'custom'`);
+						StopExecutionCompletely();
+				}
+
+
 		
 				this.mapping = mapping; // method that maps vector's virtual coordinates to other vectors
-				if (mapping) { this.mobile_flag = false; }
+				if (mapping) { this.draggable = false; }
 		
 				this.recalculate(); // calculate screen positions based on coords
 			}
@@ -98,7 +135,7 @@ class vtvt {
 
 			// test if a vector's draggable zone has been clicked/touched
 			checkHit(x, y) { 
-				return this.mobile_flag&(((this.x-x)**2 + (this.y-y)**2) < parent.circle_rad_sq);
+				return this.draggable&(((this.x-x)**2 + (this.y-y)**2) < parent.circle_rad_sq);
 			}
 			// update vector coordinates during dragging based on mouse pointer/finger position
 			updateCoordsOnMove(pointerX, pointerY) {
@@ -134,8 +171,9 @@ class vtvt {
 						parent.ctx.strokeStyle=this.line_col;
 						parent.ctx.stroke();			
 						parent.ctx.closePath();
-					// vector stem instead of a line
-					} else {
+					}
+					// vector stem
+					if (this.draw_stem) {
 						parent.ctx.beginPath();
 						parent.ctx.moveTo(parent.canvas.width/2/parent.scale, parent.canvas.height/2/parent.scale);
 						parent.ctx.lineTo(this.x, this.y);
@@ -154,14 +192,20 @@ class vtvt {
 						parent.ctx.fill();		
 						parent.ctx.closePath();
 					}
-					if (this.mobile_flag) { 
-					// add circle if the vector object is selectable
+					// draw point
+					if (this.draw_point) {
+						parent.ctx.beginPath();
+						parent.ctx.arc(this.x, this.y, parent.point_rad, 0, 2 * Math.PI, true);
+						parent.ctx.fillStyle = this.line_col;
+						parent.ctx.fill();
+						parent.ctx.closePath();
+					}
+					// add circle if the vector object is draggable
+					if (this.draggable) { 
 						parent.ctx.beginPath();
 						parent.ctx.arc(this.x, this.y, parent.circle_rad, 0, 2 * Math.PI, true);
 						parent.ctx.fillStyle = this.circle_col;
 						parent.ctx.fill();
-						//ctx.strokeStyle="rgba(0,0,0,0)";
-						//ctx.stroke;
 						parent.ctx.closePath();
 					}
 					// add text if the vector has a label
@@ -180,14 +224,16 @@ class vtvt {
 
 	// **************************************************************
 	// methods for adding new vectors to the canvas
-	addVector(coords, params) {
-		this.vectors.push(new this.Vector(coords, params));
+	addVector(args_obj) {
+		this.vectors.push(new this.Vector(args_obj));
 	}
-	addAnimationFrame(coords, params) {
-		this.vectors_animated.push(new this.Vector(coords, params));
+	addAnimationFrame(args_obj) {
+		const vec_arr = args_obj.map(el => new this.Vector(el))
+		this.vectors_animated.push(vec_arr);
 	}
 	// **************************************************************
 	
+
 	// **************************************************************
 	// calculate and add real eigenvectors
 	eigenVecs() {
@@ -211,7 +257,7 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));	
+				this.vectors_eigen.push(new this.Vector({coords: [eigen_x, eigen_y], c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, draggable: false,  visible: true}));	
 			} else {
 				lambda = a/2 + d/2 + Math.sqrt(under_rad)/2;
 				eigen_x = - c / Math.sqrt((a - lambda)**2 + c*c) * this.eig_length;
@@ -220,7 +266,7 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
+				this.vectors_eigen.push(new this.Vector({coords: [eigen_x, eigen_y], c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, draggable: false,  visible: true}));
 				lambda = a/2 + d/2 - Math.sqrt(under_rad)/2;		
 				eigen_x = - c / Math.sqrt((a - lambda)**2 + c*c) * this.eig_length;
 				eigen_y = eigen_x * (lambda - a) / c;
@@ -228,13 +274,11 @@ class vtvt {
 					eigen_x = -eigen_x;
 					eigen_y = -eigen_y;
 				}
-				this.vectors_eigen.push(new this.Vector([eigen_x, eigen_y], {c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, selectable: false,  visible: true}));
+				this.vectors_eigen.push(new this.Vector({coords:[eigen_x, eigen_y], c:this.eig_colour, label: `Eig (λ=${Math.round(lambda*100)/100})`, draggable: false,  visible: true}));
 			}
 		}
 	}
 	// **************************************************************
-
-
 
 
 	// **************************************************************
@@ -325,7 +369,10 @@ class vtvt {
 			if (frames_left == 0) {
 				clearInterval(timer);
 			} else {
-				parent.vectors_animated[parent.vectors_animated.length - frames_left].draw();
+				for (let vec of parent.vectors_animated[parent.vectors_animated.length - frames_left]) {
+					vec.draw();
+				}
+				//parent.vectors_animated[parent.vectors_animated.length - frames_left].draw();
 				frames_left -= 1;
 			}
 		}
@@ -336,7 +383,6 @@ class vtvt {
 	// **************************************************************
 
 	//document.addEventListener('orientationchange', render);
-
 
 
 	// **********************************************
@@ -403,6 +449,5 @@ class vtvt {
 		this.render();	
 	}
 	// END of mouse and touch processing
-	// *****************************************************************	
-
+	// *****************************************************************	\
 }

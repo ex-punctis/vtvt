@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+    <head>
+    <title>vtvt demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="vtvt_demo_styles.css">
+    <script type="text/javascript" src="vtvt.js"></script>
+</head>
+<body>
+    <h3>Demo canvas #3</h3>
+    <p>Animation of the power iteration algorithm.</p>
+    <div class="canvas-wrapper">
+        <p><button id='animation_trigger_3' onclick="">Press to animate power iteration</button></p>
+        <canvas id='vector_canvas_3' class="canvas-wrapped"></canvas>
+    </div> 
+
+    <script>
+        // *************************************************************************************************	 
+        // Demo canvas #3
+
+        // initialize the scene_3
+        var scene_3 = new vtvt({canvas_id: "vector_canvas_3", grid_res: 16, circle_rad: 0.5, eig_col: "150, 150, 150", frame_duration: 500, anim_trigger_id: "animation_trigger_3"});
+
+        // add columns of matrix T
+        scene_3.addVector({coords: [2, -1], c: "70, 70, 120", draggable: true, label: "t1", visible: true});
+        scene_3.addVector({coords: [-1, 3], c: "70, 120, 70", draggable: true, label: "t2", visible: true});
+
+        // add input vector for power iteration algorithm
+        scene_3.addVector({coords: [-6, 1], c: "150, 100, 100", draggable: true, label: "iter0"});
+        
+        // add the first animated vector (mapped to iter0)
+        scene_3.addAnimationFrame([{coords: [-6, 1], c: "150, 100, 100", label: "iter0", 
+            mapping: function(){ return [scene_3.vectors[2].coord_x, scene_3.vectors[2].coord_y]} }]);
+    
+        // add additional animated vectors (each mapped to the previous one)
+        for (let k = 0; k < 7; k++) {
+            let map_func = function() {
+                let x = scene_3.vectors[0].coord_x * scene_3.vectors_animated[k][0].coord_x + 
+                        scene_3.vectors[1].coord_x * scene_3.vectors_animated[k][0].coord_y;
+                let y = scene_3.vectors[0].coord_y * scene_3.vectors_animated[k][0].coord_x + 
+                        scene_3.vectors[1].coord_y * scene_3.vectors_animated[k][0].coord_y;
+                let norm = Math.sqrt(x*x + y*y);
+                return [x / norm * 4, y = y / norm * 4];
+            }	
+            // add vector to the animation sequence
+            scene_3.addAnimationFrame([ {coords: [1, 1], c: "150, 100, 100", label: `iter${k+1}`, kind: 'custom', draw_line: true, mapping: map_func} ]);
+        }
+
+        // render
+        scene_3.render();
+
+
+    </script>
+</body>
+</html>

@@ -46,25 +46,30 @@
                 draggable: true, 
                 kind: 'point'}); 
         }
+       
         // define mapping of vector 0 (invisible) to construct a covariance matrix 
         scene_7.vectors[0].mapping = function() {  
-            let sumX2 = 0, sumY2 = 0, sumXY = 0;
-            for (let k = 2; k < numPoints+2; k++) {        
+            let sumX = 0, sumY = 0, sumX2 = 0, sumY2 = 0, sumXY = 0;
+            for (let k = 2; k < numPoints+2; k++) {  
+                sumX    += scene_7.vectors[k].coord_x;
+                sumY    += scene_7.vectors[k].coord_y;
                 sumX2   += scene_7.vectors[k].coord_x * scene_7.vectors[k].coord_x;
                 sumXY   += scene_7.vectors[k].coord_x * scene_7.vectors[k].coord_y;
             }
-            return {mapX: sumX2/numPoints, mapY: sumXY/numPoints};    
+            return {mapX: (sumX2-sumX*sumX/numPoints)/numPoints, mapY: (sumXY-sumX*sumY/numPoints)/numPoints};    
         }
         // define mapping of vector 1 (invisible) to construct a covariance matrix 
         scene_7.vectors[1].mapping = function() {  
-            let sumX2 = 0, sumY2 = 0, sumXY = 0;
+            let sumX = 0, sumY = 0, sumX2 = 0, sumY2 = 0, sumXY = 0;
             for (let k = 2; k < numPoints+2; k++) {        
+                sumX    += scene_7.vectors[k].coord_x;
+                sumY    += scene_7.vectors[k].coord_y;
                 sumY2   += scene_7.vectors[k].coord_y * scene_7.vectors[k].coord_y;
                 sumXY   += scene_7.vectors[k].coord_x * scene_7.vectors[k].coord_y;
             }
-            return {mapX: sumXY/numPoints, mapY: sumY2/numPoints};    
+            return {mapX: (sumXY-sumX*sumY/numPoints)/numPoints, mapY: (sumY2-sumY*sumY/numPoints)/numPoints};    
         }
-
+       
         // render
         scene_7.render();
         scene_7.render(); // have to render again to update the matrix. not sure why...

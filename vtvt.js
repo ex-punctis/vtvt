@@ -1,12 +1,13 @@
-// v 1.01
+// v 1.02
 class vtvt {
-	constructor({canvas_id, grid_res = 14, snap_to_grid = true, circle_rad = 0.5, point_rad = 0.06, rendering_scale = 1, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
+	constructor({canvas_id, grid_res = 14, snap_to_grid = true, circle_rad = 0.5, point_rad = 0.06, rendering_scale = 1, show_matrix = true, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
 		this.grid_res = grid_res; 					// grid units for both width and height
 		this.snap_to_grid_flag = snap_to_grid; 		// snap to gred flag
 		this.circle_rad = circle_rad;   			// clickable/touchable area of a vector
 		this.point_rad = point_rad;					// point radius
 		this.frame_duration = frame_duration;     	// time per animation frame
-		this.show_eigenvectors_flag = show_eig;
+		this.show_matrix_flag = show_matrix;		// show matrix?
+		this.show_eigenvectors_flag = show_eig;		// show eigenvectors?
 		this.eig_colour = eig_col;               	// eigenvector colour
 		this.eig_length = eig_length;				// eigenvector length
 		this.rendering_scale = rendering_scale;     // affects arrow size and sharpness
@@ -60,9 +61,11 @@ class vtvt {
 
 		// vector class
 		this.Vector = class  {
-			constructor({coords=[1,1], c="150, 150, 150", label = '', kind = 'vector', draggable = false, visible = true, draw_arrow = true, draw_point = false, draw_stem = true, draw_line = false, mapping = undefined}={}) {
+			constructor({coords=[1,1], origin=[0,0], c="150, 150, 150", label = '', kind = 'vector', draggable = false, visible = true, draw_arrow = true, draw_point = false, draw_stem = true, draw_line = false, mapping = undefined}={}) {
 				this.coord_x = coords[0]; // virtual coordinate x (not screen position!)
 				this.coord_y = coords[1]; // virtual coordinate y (not screen position!)
+				this.orig_x = origin[0]; // virtual coordinate x (not screen position!)
+				this.orig_y = origin[1]; // virtual coordinate y (not screen position!)
 				this.line_col = "rgb(" + c + ")"; 			// vector line colour
 				this.circle_col = "rgba(" + c + ",0.1)";    // draggable area colour
 				this.draggable = draggable; 				// can the vector be dragged around?
@@ -101,20 +104,32 @@ class vtvt {
 						StopExecutionCompletely();
 				}
 
-
-		
 				this.mapping = mapping; // method that maps vector's virtual coordinates to other vectors
-				if (mapping) { this.draggable = false; }
+				
+				if (this.mapping) { // disable dragging if any of the coords is mapped
+					if (this.mapping().mapX || this.mapping().mapY) { this.draggable = false; } 
+				}
 		
 				this.recalculate(); // calculate screen positions based on coords
 			}
 
 			// calculate all screen positions based on virtual coordinates coord_x and coord_y
 			recalculate() {
-				if (this.mapping) { [this.coord_x, this.coord_y] = this.mapping(); }
+				if (this.mapping) { 
+					let mapX, mapY, mapXo, mapYo;	
+					( {mapX=undefined, mapY=undefined, mapXo=undefined, mapYo=undefined} = this.mapping() ); 
+					if (mapX !== undefined) { this.coord_x = mapX; }
+					if (mapY !== undefined) { this.coord_y = mapY; }
+					if (mapXo !== undefined) { this.orig_x = mapXo; }
+					if (mapYo !== undefined) { this.orig_y = mapYo; }
+				}
 		
-				this.x = parent.canvas.width  * (0.5 + this.coord_x/parent.grid_res)/parent.scale;
-				this.y = parent.canvas.height * (0.5 - this.coord_y/parent.grid_res)/parent.scale;
+				this.x = parent.canvas.width  * (0.5 + (this.coord_x + this.orig_x)/parent.grid_res)/parent.scale;
+				this.y = parent.canvas.height * (0.5 - (this.coord_y + this.orig_y)/parent.grid_res)/parent.scale;
+
+				this.o_x = parent.canvas.width  * (0.5 + this.orig_x/parent.grid_res)/parent.scale;
+				this.o_y = parent.canvas.height * (0.5 - this.orig_y/parent.grid_res)/parent.scale;
+
 				this.vec_norm = Math.sqrt(this.coord_x**2 + this.coord_y**2); // norm
 		
 				//arrow positions:
@@ -126,9 +141,9 @@ class vtvt {
 				this.arr_coord_y2 = this.y + this.coord_y/this.vec_norm*this.arr_len - this.coord_x/this.vec_norm*this.arr_width;
 		
 				// label positions
-				this.label_x = this.coord_x * (1 + parent.grid_res*0.01/Math.abs(this.coord_x));
+				this.label_x = (this.coord_x + this.orig_x) * (1 + parent.grid_res*0.01/Math.abs(this.coord_x + this.orig_x));
 				this.label_x = parent.canvas.width  * (0.5 + this.label_x/parent.grid_res)/parent.scale;
-				this.label_y = this.coord_y * (1 + parent.grid_res*0.01/Math.abs(this.coord_y));
+				this.label_y = (this.coord_y  + this.orig_y) * (1 + parent.grid_res*0.01/Math.abs(this.coord_y + this.orig_y));
 				this.label_y = parent.canvas.height  * (0.5 - this.label_y/parent.grid_res)/parent.scale;
 			}
 	
@@ -139,8 +154,8 @@ class vtvt {
 			}
 			// update vector coordinates during dragging based on mouse pointer/finger position
 			updateCoordsOnMove(pointerX, pointerY) {
-				this.coord_x = (parent.scale*pointerX/parent.canvas.width - 0.5)*parent.grid_res;
-				this.coord_y = -(parent.scale*pointerY/parent.canvas.height - 0.5)*parent.grid_res;
+				this.coord_x = (parent.scale*pointerX/parent.canvas.width - 0.5)*parent.grid_res - this.orig_x;
+				this.coord_y = -(parent.scale*pointerY/parent.canvas.height - 0.5)*parent.grid_res - this.orig_y;
 				//this.recalculate();
 			}
 
@@ -157,17 +172,29 @@ class vtvt {
 				if (this.visible) {
 					// line instead of a vector stem
 					if (this.draw_line) {
+						// line beginning coords:
+						var l_y1 = 0;
+						var l_x1 = this.o_x - (this.x - this.o_x)*this.o_y/(this.y - this.o_y);
+						if (l_x1 < 0) { 
+							l_x1 = 0;
+							l_y1 = this.o_y - (this.y - this.o_y)*this.o_x/(this.x - this.o_x);
+						} else if (l_x1 > parent.canvas.width/parent.scale) {
+							l_x1 = parent.canvas.width/parent.scale;
+							l_y1 = this.o_y + (this.y - this.o_y)*(parent.canvas.width/parent.scale - this.o_x)/(this.x - this.o_x);
+						}
+						// line end coords:
+						var l_y2 = parent.canvas.height/parent.scale;
+						var l_x2 = this.o_x + (this.x - this.o_x)*(parent.canvas.height/parent.scale - this.o_y)/(this.y - this.o_y);
+						if (l_x2 < 0) { 
+							l_x2 = 0;
+							l_y2 = this.o_y - (this.y - this.o_y)*this.o_x/(this.x - this.o_x);
+						} else if (l_x2 > parent.canvas.width/parent.scale) {
+							l_x2 = parent.canvas.width/parent.scale;
+							l_y2 = this.o_y + (this.y - this.o_y)*(parent.canvas.width/parent.scale - this.o_x)/(this.x - this.o_x);
+						}
 						parent.ctx.beginPath();
-						// reflect this.x, this.y over (0,0) and extend the line to the closest edge of the canvas
-						var line_scalar = Math.min(
-							Math.abs(parent.canvas.width/2/parent.scale/(parent.canvas.width/2/parent.scale - this.x)),
-							Math.abs(parent.canvas.height/2/parent.scale/parent.canvas.height/2/parent.scale - this.y) );
-						parent.ctx.moveTo(
-							parent.canvas.width/2/parent.scale*(line_scalar+1) - this.x*(line_scalar), 
-							parent.canvas.height/2/parent.scale*(line_scalar+1) - this.y*(line_scalar));
-						parent.ctx.lineTo(
-							parent.canvas.width/2/parent.scale*(1-line_scalar) + this.x*(line_scalar), 
-							parent.canvas.height/2/parent.scale*(1-line_scalar) + this.y*(line_scalar));
+						parent.ctx.moveTo(l_x1, l_y1);
+						parent.ctx.lineTo(l_x2, l_y2);
 						parent.ctx.strokeStyle=this.line_col;
 						parent.ctx.stroke();			
 						parent.ctx.closePath();
@@ -175,7 +202,7 @@ class vtvt {
 					// vector stem
 					if (this.draw_stem) {
 						parent.ctx.beginPath();
-						parent.ctx.moveTo(parent.canvas.width/2/parent.scale, parent.canvas.height/2/parent.scale);
+						parent.ctx.moveTo(this.o_x, this.o_y);
 						parent.ctx.lineTo(this.x, this.y);
 						parent.ctx.strokeStyle=this.line_col;
 						parent.ctx.stroke();			
@@ -313,12 +340,12 @@ class vtvt {
 			parent.ctx.closePath();
 		}
 
-		// helper func: draw text (not labels)	
+		// helper func: show matrix (not labels)	
 		function drawText() {
 			parent.ctx.beginPath();
 			parent.ctx.font = "20px Arial";
 			parent.ctx.fillStyle = "#555555";
-			parent.ctx.fillText("T=[              ]", 6, 23);
+			parent.ctx.fillText("T=[               ]", 6, 23);
 			parent.ctx.closePath();
 	
 			parent.ctx.beginPath();
@@ -341,9 +368,7 @@ class vtvt {
 		this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 		drawGrid();
 	
-		//if (selection_index == undefined) {
-		drawText();
-		//}
+		if (this.show_matrix_flag) { drawText(); }
 	
 		// draw regular vectors
 		for (var i = this.vectors.length-1; i >= 0; i--) {

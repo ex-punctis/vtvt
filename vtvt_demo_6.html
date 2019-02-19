@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+    <head>
+    <title>vtvt demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="vtvt_demo_styles.css">
+    <script type="text/javascript" src="vtvt.js"></script>
+</head>
+<body>
+
+    <h3>Demo canvas #6</h3>
+    <p>Interactive linear regression. Each point can be moved around.</p>
+    <div class="canvas-wrapper">
+        <canvas id='vector_canvas_6' class="canvas-wrapped"></canvas>
+    </div> 
+   
+
+    <script>
+        // *************************************************************************************************	 
+        // Demo canvas 6
+        // Linear regression (OLS)
+        
+        // initialize the scene
+        var scene_6 = new vtvt({canvas_id: "vector_canvas_6", grid_res: 16, circle_rad: 0.5, show_matrix: false, show_eig: false});
+
+        // add points, can be dragged    
+        scene_6.addVector({coords: [-7.1, -3],     c: "244, 95, 66", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [-5.3, -3.5],   c: "244, 185, 66", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [-3.2, -2.3],     c: "180, 200, 50", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [-1.8, -1.5],   c: "55, 215, 45", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [1.1, 0.4],     c: "66, 244, 206", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [3.6, 1.6],     c: "66, 161, 244", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [5.2, 2],       c: "134, 66, 244", draggable: true, kind: 'point'});   
+        scene_6.addVector({coords: [7.7, 2.7],     c: "240, 66, 188", draggable: true, kind: 'point'});   
+
+        // OLS parameter estimation
+        let mapFunc = function() { 
+            let sumX = 0, sumX2 = 0, sumY = 0, sumXY = 0;
+            for (let i = 0; i<8; i++) {
+                sumX    += scene_6.vectors[i].coord_x;
+                sumX2   += scene_6.vectors[i].coord_x * scene_6.vectors[i].coord_x;
+                sumY    += scene_6.vectors[i].coord_y;
+                sumXY   += scene_6.vectors[i].coord_x * scene_6.vectors[i].coord_y;
+            }
+          
+            return {
+                mapXo: 0,
+                mapYo: (sumY*sumX2 - sumX*sumXY)/(8*sumX2 - sumX*sumX),
+                mapX: 1, 
+                mapY: (8*sumXY - sumX*sumY)/(8*sumX2 - sumX*sumX)
+            };
+        } 
+
+        // add regression line    
+        scene_6.addVector({c: "70,70,70", kind: 'line', draggable: false, label: "", mapping: mapFunc });           
+        
+        // add projections onto regression line
+        for (let k=0;k<8;k++) {
+            let mapFunc = function() {
+                return {mapX: 0,
+                        mapY: scene_6.vectors[8].orig_y + scene_6.vectors[k].coord_x*scene_6.vectors[8].coord_y/scene_6.vectors[8].coord_x - scene_6.vectors[k].coord_y,
+                        mapXo: scene_6.vectors[k].coord_x,
+                        mapYo: scene_6.vectors[k].coord_y }; }
+
+            scene_6.addVector({kind: 'custom', draw_stem: true, draw_arrow: false, draggable: false, mapping: mapFunc });    
+            // map line colour
+            scene_6.vectors[9+k].line_col = scene_6.vectors[k].line_col;
+        }
+            
+
+
+        // render
+        scene_6.render();	
+    </script>
+</body>
+</html>

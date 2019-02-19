@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en-CA">
+    <head>
+    <title>vtvt demo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="vtvt_demo_styles.css">
+    <script type="text/javascript" src="vtvt.js"></script>
+</head>
+<body>
+    <h3>Demo canvas #5</h3>
+    <p>Unit circle transformation</p>
+    <p><button id='animation_trigger_5'>Press to animate unit circle transformation</button></p>
+    <div class="canvas-wrapper">
+        <canvas id='vector_canvas_5' class="canvas-wrapped"></canvas>
+    </div> 
+
+
+    <script>
+ //*************************************************************************************************	 
+        // Demo canvas 5
+        // unit circle static vectors
+
+        // initialize the scene
+        var scene5 = new vtvt({canvas_id: "vector_canvas_5", grid_res: 16, circle_rad: 0.5, show_eig: false, frame_duration: 50, anim_trigger_id: "animation_trigger_5"});
+
+        // add columns of matrix T
+        scene5.addVector({coords: [4, -1], c: "70, 70, 120", draggable: true,label: "t1"});
+        scene5.addVector({coords: [-3, 5], c: "70, 120, 70", draggable: true, label: "t2"});
+        
+        // add transformed and original unit circle vectors
+        for (var k = 0; k < 360; k=k+2) {            
+            let cos = Math.cos(k * Math.PI / 180);
+            let sin = Math.sin(k * Math.PI / 180);
+            let vec_map = function() {
+                let x = scene5.vectors[0].coord_x * cos + 
+                        scene5.vectors[1].coord_x * sin;
+                let y = scene5.vectors[0].coord_y * cos + 
+                        scene5.vectors[1].coord_y * sin;
+                return {mapX: x, mapY: y};
+            }
+
+            let colour = function() {
+                let r = 150 + 100*cos; //(phase shift 0º)
+                let g = 150 + 100*(-0.5*cos - 0.866*sin); //(phase shift 120º)
+                let b = 150 + 100*(-0.5*cos + 0.866*sin); //(phase shift 240º)
+            return `${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`;
+            }
+
+            scene5.addVector({coords: [1, 1], c: colour(), kind: 'point', mapping: vec_map });
+            scene5.addVector({coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false, kind: 'point' });
+
+            scene5.addAnimationFrame([ 
+                {coords: [1, 1], c: colour(), mapping: vec_map }, 
+                {coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false}  ]);
+        }
+
+        // render
+        scene5.render();
+
+    </script>
+</body>
+</html>

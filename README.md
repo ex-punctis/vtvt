@@ -2,10 +2,10 @@
  
 vtvt is an interactive tool for visualizing vectors and their transformations in R2. It's written in plain JavaScript (ECMAScript 2015) and utilizes html5 \<canvas\>. 
 
-Current version: 1.01 (2019-01-14)
+Current version: 1.02 (2019-02-18)
 
 ## Features
-- displays custom vectors, lines (at this point both must originate from or pass through [0,0]) and points;
+- displays custom vectors, lines and points;
 - supports object dragging (mouse or touch gestures);
 - supports custom vector mapping (i.e. you can make a vector update itself continuously based on other vectors);
 - built-in calculation and display of eigenvectors;
@@ -18,7 +18,7 @@ Current version: 1.01 (2019-01-14)
 
 ## Reference
 
-### Workflow:
+### Workflow
 
 1. Add a canvas element to your web page with its width and height specified (must be equal!) in CSS. Example:
 ```html
@@ -39,7 +39,7 @@ Current version: 1.01 (2019-01-14)
 5. Render
 
 
-### Scene initialization:
+### Scene initialization
 
 ```
 var <scene> = new vtvt({canvas_id: '<canvas_id>', <aesthetic_args> });
@@ -55,8 +55,9 @@ var <scene> = new vtvt({canvas_id: '<canvas_id>', <aesthetic_args> });
 | grid_res | 14 | the number of axis units per canvas width/height (grid lines are spaced one unit apart, so don't go crazy with this parameter) |
 | snap_to_grid | true | round vector coordinates to the first decimal place |
 | circle_rad | 0.5 | the size of the clickable/touchable area by which an object can be dragged around |
-| point_rad | 0.06] | the size of the point (when a vector is rendered as a point) |
-| rendering_scale | 1 | resolution upscaling factor; try setting to two on regular low-ppi monitors for sharper graphics (note: it also affect the size of vector arrows) |
+| point_rad | 0.06 | the size of the point (when a vector is rendered as a point) |
+| rendering_scale | 1 | resolution upscaling factor; try setting to two on regular low-ppi monitors for sharper graphics (note: it also affects the size of vector arrows) |
+| show_matrix | true | show the matrix determined by the first two vectors or not? |
 | show_eig | true | show eigenvectors or not? |
 | eig_col | "150, 150, 150" | eigenvector colour |
 | eig_length | 4 | eigenvector length |
@@ -69,68 +70,118 @@ Example:
 scene = new vtvt({canvas_id: 'canvas1', grid_res: 16, circle_rad: 0.5, show_eig: false});
 ```
 
-### Adding regular vectors/lines (not specific to the animation sequence):
+### Adding regular vectors/lines (not specific to the animation sequence)
 
 To add vectors that are always rendered use the following method:
 
+
 ```
-<scene>.addVector({coords: [<coord_x>, <coord_y>], <aesthetic_args>});
+<scene>.addVector({coords: [<coord_x>, <coord_y>], origin: [<coord_x>, <coord_y>], <aesthetic_args>});
 ```
+
+| key | default       | Description |
+| --- | ------------- | ------------|
+| coords | [1,1] | vector coordinates (relative to (0,0)) |
+| origin | [0,0] | coordinates of vector origin (same as displacement vector coordinates) |
 
 `<aesthetic_args> (format: arg1:value1, arg2:value2, ..., argN:valueN):`
 
-| key | default value | Description |
+| key | default       | Description |
 | --- | ------------- | ------------|
 | c | "150, 150, 150" | colour (RGB 0-255) |
 | label | '' | vector label |
 | draggable |false | can the object be dragged? |
-| visible | true | is the object visible? |
+| visible | true | should the object be visible? |
 | kind | 'vector' | an easy way to specify what the object should look like: 'vector', 'line', 'point' or 'custom' |
 | draw_arrow | true | (applies if kind: 'custom') draw the arrowhead? |
 | draw_point | false | (applies if kind: 'custom') draw a point at [coord_x, coord_y]? |
 | draw_stem | true | (applies if kind: 'custom') draw the vector stem? |
-| draw_line | false | (applies if kind: 'custom') draw a line across the whole screen (as opposed to just the vector stem)? |
-| mapping | undefined | if you want the vector to be mapped to other vectors, specify a function returning the vector coordinates here. | 
-
-**Note:** you can access i-th vector's coordinates with `<scene>.vectors[i].coord_x` and `.coord_y`
+| draw_line | false | (applies if kind: 'custom') draw a line across the whole screen? |
+| mapping | undefined | a function mapping vector coordinates (refer to the following section for details) | 
 
 Example:
 
 ```javascript
-scene.addVector({coords: [-1, 3], c: "250, 200, 200", label: "m = t1+t2", visible: true, mapping: function(){ 
-	return [scene.vectors[0].coord_x + scene.vectors[1].coord_x, scene.vectors[0].coord_y + scene.vectors[1].coord_y ];} });
+scene.addVector({
+    coords: [-1, 3], c: "250, 200, 200", label: "m = t1+t2", visible: true, 
+    mapping: function(){ 
+        return {mapX: scene.vectors[0].coord_x + scene.vectors[1].coord_x, 
+                mapY: scene.vectors[0].coord_y + scene.vectors[1].coord_y};
+    } 
+});
 ```
-**Note:** the first two vectors (regardless of their aesthetic arguments) created via `<scene>.addVector();` determine the columns of matrix T which is displayed on the canvas.
+   
+**Note:** the first two vectors (regardless of their aesthetic arguments) created via `<scene>.addVector()` determine the columns of matrix T (which is displayed on the canvas unless the scene was initialized with `show_matrix:false`). If `show_eig` is true, then this matrix will be used to calculate the corresponding eigenvectors and eigenvalues.
 
-Please refer to the demo files for more/better examples of specifying the mapping function.
+
+### Specifying a mapping function 
+
+If you want to update a vector based on other vectors, this can be done by specifying a mapping function that returns the following object:
+
+```
+{
+    mapXo: <origin displacement: coordinate x>,
+    mapYo: <origin displacement: coordinate y>,
+    mapX: <vector coordinates: x (relative to (0,0))>, 
+    mapY: <vector coordinates: y (relative to (0,0))>
+}
+```
+
+You can access the i-th vector's coordinates with `<scene>.vectors[i].coord_x` and `.coord_y`. The coordinates of the origin point can be accessed with `<scene>.vectors[i].orig_x` and `.orig_y`. Please note that the array of vectors is 0-indexed, so the first vector you add with `<scene>.addVector()` is `<scene>.vectors[0]`, the second vector is `<scene>.vectors[1]`, and so on.
+
+If you want to map only the point of origin, you car return an object specifying just `mapXo` and `mapYo`. Similarly if you want to map only the coordinates, the object may contain just `mapX` and `mapY`. Please note if the object contains `mapX` or `mapY`, the vector will not be draggable.
+
+In some cases you might need to map the first two vectors (which define matrix T used for eigen-calculations) to vectors added afterwards. An attempt to initialize them with the mapping function specified will fail because the mapping refers to vectors which have not been initialized yet. The workaround is to initialize the first two vectors without the mapping function, initialize the rest of the vectors, and then assign the mapping function to `scene.vectors[<0|1>].mapping`. The following example turns the first two vectors into the columns of a covariance matrix:
+
+```javascript
+scene.vectors[0].mapping = function() {  
+    let sumX2 = 0, sumY2 = 0, sumXY = 0;
+    for (let k = 2; k < numPoints+2; k++) {        
+        sumX2   += scene.vectors[k].coord_x * scene.vectors[k].coord_x;
+        sumXY   += scene.vectors[k].coord_x * scene.vectors[k].coord_y;
+    }
+    return {mapX: sumX2/numPoints, mapY: sumXY/numPoints};    
+}
+
+scene.vectors[1].mapping = function() {  
+    let sumX2 = 0, sumY2 = 0, sumXY = 0;
+    for (let k = 2; k < numPoints+2; k++) {        
+        sumY2   += scene.vectors[k].coord_y * scene.vectors[k].coord_y;
+        sumXY   += scene.vectors[k].coord_x * scene.vectors[k].coord_y;
+    }
+    return {mapX: sumXY/numPoints, mapY: sumY2/numPoints};    
+}
+```
+
+Please refer to the demo files for additional examples of specifying the mapping function.
 
 ### Adding vectors to the animated sequence:
 
-Vectors from the animation sequence are rendered only once the animation is triggered. To add one frame of animation
+Vectors from the animated sequence are rendered only once the animation is triggered. To add one frame to the sequence use 
 
 ```
 <scene>.addAnimationFrame([<args_obj_1, args_obj_2, ..., args_obj_N]);
 ```
 where N is the number of animated vectors shown in this frame
 
-each `args_obj_K` = `{coords: [coord_x, coord_y], <aesthetic_args>}`
+each `args_obj_K` = `{coords: [<coord_x>, <coord_y>], origin: [<coord_x>, <coord_y>], <aesthetic_args>}`
 
 The aesthetic arguments are the same as for `<scene>.addVector()`
 
 `.addAnimationFrame()` always takes an array as its argument. Even if you want only one animated vector per frame, it still needs to surrounded by the square brackets.
 
-**Note:** you can access k-th animated vector's coordinates in i-th frame with `<scene>.vectors_animated[i][k].coord_x` and `.coord_y` 
+You can access the k-th animated vector's coordinates in the i-th frame with `<scene>.vectors_animated[i][k].coord_x` and `.coord_y`. The coordinates of the origin point can be accessed with `<scene>.vectors_animated[i][k].orig_x` and `.orig_y`
 
 Example:
 
 ```javascript
 scene.addAnimationFrame([{coords: [1, 1], c: "150, 100, 100", label: "iter0", mapping: function(){ 
-    return [scene.vectors[2].coord_x, scene.vectors[2].coord_y]} }]);
+    return {mapX: scene.vectors[2].coord_x, mapY: scene.vectors[2].coord_y} }]);
 ```
 
 ## Troubleshooting
 
-When something doesn't work, first ~~**blame me**~~ check your browser's console for error messages. Most likely, the arguments to `.addVector()` or `.addAnimationFrame()` are messed up. Errors in custom mapping functions are fairly common as well. Try probing vector objects in the console (e.g., `scene.vectors[i]`) to see what they look like.
+When something doesn't work, first ~~blame me~~ check your browser's console for error messages. Most likely, the arguments to `.addVector()` or `.addAnimationFrame()` are messed up. Errors in custom mapping functions are fairly common as well. Try probing vector objects in the console (e.g., `scene.vectors[i]`) to see what they look like.
 
 If you're lost or you suspect something is wrong with **vtvt**, [report the issue](https://github.com/ex-punctis/vtvt/issues) on github.
 
@@ -139,7 +190,7 @@ If you're lost or you suspect something is wrong with **vtvt**, [report the issu
 v1.01 2019-01-14
 
 - updated readme
-- class vtvt: new point_rad property
+- class vtvt: new 'point_rad' property
 - class Vector: 
     - property 'selectable' renamed as 'draggable'
     - new properties:
@@ -150,13 +201,21 @@ v1.01 2019-01-14
         - addVector() — the argument is now an object
         - addAnimationFrame() — the argument is now a list of objects
 
+v1.02 2019-02-18
+- updated readme
+- class vtvt: new 'show_matrix' property
+- class Vector:
+    - new 'origin' property
+    - updated all methods to support origin displacement
+    - mapping function should now return an object instead of an array
+- updated demos
 
 ## Things to do in the future
 
 - add grid transformation
 - add support for displaying arbitrary text
 - show matrix T in a separate html element
-- add support for origin displacement
+- use camelCase for variable names
 
 ## License and credits
 

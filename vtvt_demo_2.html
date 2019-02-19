@@ -10,7 +10,7 @@
 <body>
 
     <h3>Demo canvas #2</h3>
-    <p>Besides vectors, it's also possible to draw lines, points and custom objects.</p>
+    <p>Another illustration of vector addition</p>
     <div class="canvas-wrapper">
         <canvas id='vector_canvas_2' class="canvas-wrapped"></canvas>
     </div> 
@@ -18,29 +18,36 @@
 
     <script>
         // *************************************************************************************************	 
-        // Demo canvas #2
+        // Demo canvas 2
         
         // initialize the scene
-        var scene2 = new vtvt({canvas_id: "vector_canvas_2", grid_res: 16, circle_rad: 0.5, show_eig: false});
+        var scene2 = new vtvt({canvas_id: "vector_canvas_2", grid_res: 16, circle_rad: 0.5, show_matrix: false, show_eig: false});
 
-        // point only, cannot be dragged    
-        scene2.addVector({coords: [-6, 1], c: "210, 20, 0", draggable: false, kind: 'point', draw_line: true, draw_arrow: false, label: "static point"});
-        // line only, cannot be dragged
-        scene2.addVector({coords: [-5, 2], c: "210, 100, 210", draggable: false, kind: 'line', label: "static line"});   
-        // vector, cannot be dragged    
-        scene2.addVector({coords: [-4, 4], c: "70, 50, 220", draggable: false, kind: 'vector', label: "static vector"}); 
-        // stem + point, cannot be dragged
-        scene2.addVector({coords: [-2, 5], c: "50, 220, 140", draggable: false, kind: 'custom', draw_arrow: false, draw_point: true, label: "static stem+point"}); 
-        // vector + line, can be dragged    
-        scene2.addVector({coords: [2, 5], c: "100, 150, 150", draggable: true, kind: 'custom', draw_line: true, label: "line+arrow"});   
-        // line only, can be dragged    
-        scene2.addVector({coords: [4, 4], c: "120, 200, 90", draggable: true, kind: 'line', draw_line: true, draw_arrow: false, label: "line"});
-        // line and point, can be dragged    
-        scene2.addVector({coords: [5, 3], c: "200, 100, 50", draggable: true, kind: 'custom', draw_line: true, draw_arrow: false, draw_point: true, label: "line+point"}); 
-        // point only, can  be dragged    
-        scene2.addVector({coords: [6, 1], c: "0, 100, 200", draggable: true, kind: 'point', label: "point"});
-        //arrow, draggable
-        scene2.addVector({coords: [5, -1], c: "255, 87, 51", draggable: true, kind: 'custom', draw_stem: false, label: "arrow"});    
+        // vector , can be dragged    
+        scene2.addVector({coords: [-2, -4], c: "190, 160, 0", draggable: true, kind: 'vector', label: "v1"});   
+
+        scene2.addVector({coords: [-1, 7], c: "0, 160, 190", draggable: true, kind: 'vector', label: "v2", mapping: function(){ 
+                return {
+                    mapXo: scene2.vectors[0].coord_x, 
+                    mapYo: scene2.vectors[0].coord_y
+                };
+            }  });    
+        
+        scene2.addVector({coords: [6, 1], c: "190, 0, 190", draggable: true, kind: 'vector', label: "v3", mapping: function(){ 
+                return {
+                    mapXo: scene2.vectors[0].coord_x + scene2.vectors[1].coord_x, 
+                    mapYo: scene2.vectors[0].coord_y + scene2.vectors[1].coord_y
+                };
+            }  });    
+            
+        scene2.addVector({c: "200,200,200", draggable: true, kind: 'vector', draggable: false, label: "     v1+v2+v3", mapping: function(){ 
+                return {
+                    mapX: scene2.vectors[0].coord_x + scene2.vectors[1].coord_x + scene2.vectors[2].coord_x, 
+                    mapY: scene2.vectors[0].coord_y + scene2.vectors[1].coord_y + scene2.vectors[2].coord_y
+                };
+            }  });           
+       
+            
 
 
         // render

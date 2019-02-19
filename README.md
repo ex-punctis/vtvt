@@ -83,7 +83,7 @@ To add vectors that are always rendered use the following method:
 
 | key | default       | Description |
 | --- | ------------- | ------------|
-| coords | [1,1] | vector coordinates (relative to (0,0)) |
+| coords | [1,1] | vector coordinates (relative to the point of origin) |
 | origin | [0,0] | coordinates of vector origin (same as displacement vector coordinates) |
 
 `<aesthetic_args> (format: arg1:value1, arg2:value2, ..., argN:valueN):`
@@ -124,8 +124,8 @@ If you want to update a vector based on other vectors, this can be done by speci
 {
     mapXo: <origin displacement: coordinate x>,
     mapYo: <origin displacement: coordinate y>,
-    mapX: <vector coordinates: x (relative to (0,0))>, 
-    mapY: <vector coordinates: y (relative to (0,0))>
+    mapX: <vector coordinates: x (relative to the the point of origin)>, 
+    mapY: <vector coordinates: y (relative to the the point of origin)>
 }
 ```
 

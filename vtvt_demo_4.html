@@ -34,7 +34,7 @@
             mapping: function(){ return {mapX: scene4.vectors[2].coord_x, mapY: scene4.vectors[2].coord_y} } }]);
     
         // add additional animated vectors (each mapped to the previous one)
-        for (let k = 0; k < 7; k++) {
+        for (let k = 0; k < 20; k++) {
             let map_func = function() {
                 let x = scene4.vectors[0].coord_x * scene4.vectors_animated[k][0].coord_x + 
                         scene4.vectors[1].coord_x * scene4.vectors_animated[k][0].coord_y;

@@ -2,6 +2,8 @@
  
 vtvt is an interactive tool for visualizing vectors and their transformations in R2. It's written in plain JavaScript (ECMAScript 2015) and utilizes html5 \<canvas\>. 
 
+<img src="https://raw.githubusercontent.com/ex-punctis/vtvt/master/unit-circle-demo.gif" height="275" width="252">
+
 Current version: 1.02 (2019-02-18)
 
 **Note on compatibility with v1.01:** a vector mapping function should now return an object rather than an array of coordinates! Sorry for the inconvenience, but this change had to be done. 

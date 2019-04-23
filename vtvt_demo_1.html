@@ -30,14 +30,14 @@
         scene1.addVector({coords: [-1, 7], c: "0, 160, 190", draggable: true, kind: 'vector', label: "v2"});    
     
         // add copy of v2 with origin is mapped to v1
-        scene1.addVector({coords: [-1, 7], c: "200,200,200", draggable: true, kind: 'vector', mapping: function(){ 
+        scene1.addVector({coords: [-1, 7], c: "200,200,200", draggable: true, kind: 'vector', map_coords: function(){ 
                 return { mapX: scene1.vectors[1].coord_x,
                          mapY: scene1.vectors[1].coord_y,
                          mapXo: scene1.vectors[0].coord_x,
                          mapYo: scene1.vectors[0].coord_y }; }  });    
 
         // add v3 = v1+v2
-        scene1.addVector({c: "190,160,0", draggable: true, kind: 'vector', draggable: false, label: "v3=v1+v2", mapping: function(){ 
+        scene1.addVector({c: "190,160,0", draggable: true, kind: 'vector', draggable: false, label: "v3=v1+v2", map_coords: function(){ 
                 return { mapX: scene1.vectors[0].coord_x + scene1.vectors[1].coord_x, 
                          mapY: scene1.vectors[0].coord_y + scene1.vectors[1].coord_y }; }  });           
 

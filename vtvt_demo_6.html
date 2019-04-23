@@ -53,7 +53,7 @@
         } 
 
         // add regression line    
-        scene_6.addVector({c: "70,70,70", kind: 'line', draggable: false, label: "", mapping: mapFunc });           
+        scene_6.addVector({c: "70,70,70", kind: 'line', draggable: false, label: "", map_coords: mapFunc });           
         
         // add projections onto regression line
         for (let k=0;k<8;k++) {
@@ -63,7 +63,7 @@
                         mapXo: scene_6.vectors[k].coord_x,
                         mapYo: scene_6.vectors[k].coord_y }; }
 
-            scene_6.addVector({kind: 'custom', draw_stem: true, draw_arrow: false, draggable: false, mapping: mapFunc });    
+            scene_6.addVector({kind: 'custom', draw_stem: true, draw_arrow: false, draggable: false, map_coords: mapFunc });    
             // map line colour
             scene_6.vectors[9+k].line_col = scene_6.vectors[k].line_col;
         }

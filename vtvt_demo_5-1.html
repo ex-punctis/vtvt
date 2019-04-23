@@ -47,20 +47,20 @@
             return `${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`;
             }
 			// add transformed unit circle vector
-            scene5.addVector({c: colour(), kind: 'point', mapping: vec_map });
+            scene5.addVector({c: colour(), kind: 'point', map_coords: vec_map });
             // add original unit circle vector
             scene5.addVector({coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour(), selectable: false, kind: 'point' });
             // add sine plot vector
-            scene5.addVector({c: "180,180,180", kind: 'point', mapping: function() {
+            scene5.addVector({c: "180,180,180", kind: 'point', map_coords: function() {
                     return {
                         mapX: -8 + i*16/180,
                         mapY: scene5.vectors[0].coord_y * cos + scene5.vectors[1].coord_y * sin }
                     } });
 			// animation for the unit circle vectors + sine plot
 			scene5.addAnimationFrame([ 
-				{c: colour(), mapping: vec_map }, 
+				{c: colour(), map_coords: vec_map }, 
 				{coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false},
-				{c: colour(), kind: 'point', mapping: function() {
+				{c: colour(), kind: 'point', map_coords: function() {
                     return {
                         mapX: -8 + i*16/180,
                         mapY: scene5.vectors[0].coord_y * cos + scene5.vectors[1].coord_y * sin }

@@ -26,21 +26,21 @@
         // vector , can be dragged    
         scene2.addVector({coords: [-2, -4], c: "190, 160, 0", draggable: true, kind: 'vector', label: "v1"});   
 
-        scene2.addVector({coords: [-1, 7], c: "0, 160, 190", draggable: true, kind: 'vector', label: "v2", mapping: function(){ 
+        scene2.addVector({coords: [-1, 7], c: "0, 160, 190", draggable: true, kind: 'vector', label: "v2", map_coords: function(){ 
                 return {
                     mapXo: scene2.vectors[0].coord_x, 
                     mapYo: scene2.vectors[0].coord_y
                 };
             }  });    
         
-        scene2.addVector({coords: [6, 1], c: "190, 0, 190", draggable: true, kind: 'vector', label: "v3", mapping: function(){ 
+        scene2.addVector({coords: [6, 1], c: "190, 0, 190", draggable: true, kind: 'vector', label: "v3", map_coords: function(){ 
                 return {
                     mapXo: scene2.vectors[0].coord_x + scene2.vectors[1].coord_x, 
                     mapYo: scene2.vectors[0].coord_y + scene2.vectors[1].coord_y
                 };
             }  });    
             
-        scene2.addVector({c: "200,200,200", draggable: true, kind: 'vector', draggable: false, label: "     v1+v2+v3", mapping: function(){ 
+        scene2.addVector({c: "200,200,200", draggable: true, kind: 'vector', draggable: false, label: "     v1+v2+v3", map_coords: function(){ 
                 return {
                     mapX: scene2.vectors[0].coord_x + scene2.vectors[1].coord_x + scene2.vectors[2].coord_x, 
                     mapY: scene2.vectors[0].coord_y + scene2.vectors[1].coord_y + scene2.vectors[2].coord_y

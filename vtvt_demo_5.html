@@ -47,11 +47,11 @@
             return `${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`;
             }
 
-            scene5.addVector({coords: [1, 1], c: colour(), kind: 'point', mapping: vec_map });
+            scene5.addVector({coords: [1, 1], c: colour(), kind: 'point', map_coords: vec_map });
             scene5.addVector({coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false, kind: 'point' });
 
             scene5.addAnimationFrame([ 
-                {coords: [1, 1], c: colour(), mapping: vec_map }, 
+                {coords: [1, 1], c: colour(), map_coords: vec_map }, 
                 {coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false}  ]);
         }
 

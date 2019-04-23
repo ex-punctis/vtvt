@@ -47,12 +47,12 @@
             return `${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}`;
             }
 			// add transformed unit circle vector
-            scene5_2.addVector({c: colour(), kind: 'point', mapping: vec_map });
+            scene5_2.addVector({c: colour(), kind: 'point', map_coords: vec_map });
             // add original unit circle vector
             scene5_2.addVector({coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour(), kind: 'point' });
             // add sine curve vector
             if (i>0) {
-                scene5_2.addVector({c: colour(), kind: 'custom', draw_arrow: false, mapping: function() {
+                scene5_2.addVector({c: colour(), kind: 'custom', draw_arrow: false, map_coords: function() {
                     return {
                         mapXo: scene5_2.vectors[i*3+1].coord_x + scene5_2.vectors[i*3+1].orig_x,
                         mapYo: scene5_2.vectors[i*3+1].coord_y + scene5_2.vectors[i*3+1].orig_y,
@@ -60,7 +60,7 @@
                         mapY: scene5_2.vectors[0].coord_y * cos + scene5_2.vectors[1].coord_y * sin - scene5_2.vectors[i*3+1].coord_y - scene5_2.vectors[i*3+1].orig_y }
                     } });
             } else {
-                scene5_2.addVector({c: colour(), visible: false, mapping: function() {
+                scene5_2.addVector({c: colour(), visible: false, map_coords: function() {
                         return {
                             mapX: -7.9,
                             mapY: scene5_2.vectors[0].coord_y * cos + scene5_2.vectors[1].coord_y * sin }
@@ -69,9 +69,9 @@
 
             // add animated vectors for the unit circles and the sine curve
 			scene5_2.addAnimationFrame([ 
-				{c: colour(), mapping: vec_map }, 
+				{c: colour(), map_coords: vec_map }, 
 				{coords: [Math.cos(k * Math.PI / 180), Math.sin(k * Math.PI / 180)], c: colour, selectable: false},
-				{c: colour(), kind: 'point', mapping: function() {
+				{c: colour(), kind: 'point', map_coords: function() {
                     return {
                         mapX: -7.9 + i*16/180,
                         mapY: scene5_2.vectors[0].coord_y * cos + scene5_2.vectors[1].coord_y * sin }

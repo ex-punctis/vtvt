@@ -54,7 +54,7 @@
         scene3.addVector({coords: [1, 4], origin: [-5,-5], c: "190, 160, 0", draggable: true, kind: 'vector', label: "displaced"});   
 
         // a displaced vector + line, can be dragged    
-        scene3.addVector({coords: [5, -4], origin: [5, -4], c: "255, 10, 10", draggable: true, kind: 'custom', draw_line: true, label: "displaced line+arrow", mapping: function(){
+        scene3.addVector({coords: [5, -4], origin: [5, -4], c: "255, 10, 10", draggable: true, kind: 'custom', draw_line: true, label: "displaced line+arrow", map_coords: function(){
             return {mapXo: scene3.vectors[9].coord_x + scene3.vectors[9].orig_x, mapYo: scene3.vectors[9].coord_y + scene3.vectors[9].orig_y}
         }});   
 

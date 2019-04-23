@@ -1,4 +1,4 @@
-// v 1.02
+// v 1.03
 class vtvt {
 	constructor({canvas_id, grid_res = 14, snap_to_grid = true, circle_rad = 0.5, point_rad = 0.06, rendering_scale = 1, show_matrix = true, show_eig = true, eig_col = "150, 150, 150", eig_length = 4, frame_duration = 500, anim_trigger_id = ''}={}) {
 		this.grid_res = grid_res; 					// grid units for both width and height
@@ -61,7 +61,7 @@ class vtvt {
 
 		// vector class
 		this.Vector = class  {
-			constructor({coords=[1,1], origin=[0,0], c="150, 150, 150", label = '', kind = 'vector', draggable = false, visible = true, draw_arrow = true, draw_point = false, draw_stem = true, draw_line = false, mapping = undefined}={}) {
+			constructor({coords=[1,1], origin=[0,0], c="150, 150, 150", label = '', kind = 'vector', draggable = false, visible = true, draw_arrow = true, draw_point = false, draw_stem = true, draw_line = false, map_coords = undefined, map_col = undefined}={}) {
 				this.coord_x = coords[0]; // virtual coordinate x (not screen position!)
 				this.coord_y = coords[1]; // virtual coordinate y (not screen position!)
 				this.orig_x = origin[0]; // virtual coordinate x (not screen position!)
@@ -104,26 +104,35 @@ class vtvt {
 						StopExecutionCompletely();
 				}
 
-				this.mapping = mapping; // method that maps vector's virtual coordinates to other vectors
+				this.map_coords = map_coords; // method that maps vector's virtual coordinates to other vectors
 				
-				if (this.mapping) { // disable dragging if any of the coords is mapped
-					if (this.mapping().mapX || this.mapping().mapY) { this.draggable = false; } 
+				if (this.map_coords) { // disable dragging if any of the coords is mapped
+					if (this.map_coords().mapX || this.map_coords().mapY) { this.draggable = false; } 
 				}
 		
+				this.map_col = map_col; // method that maps vector's colour to other vectors
+
 				this.recalculate(); // calculate screen positions based on coords
 			}
 
 			// calculate all screen positions based on virtual coordinates coord_x and coord_y
 			recalculate() {
-				if (this.mapping) { 
+				if (this.map_coords) { 
 					let mapX, mapY, mapXo, mapYo;	
-					( {mapX=undefined, mapY=undefined, mapXo=undefined, mapYo=undefined} = this.mapping() ); 
+					( {mapX=undefined, mapY=undefined, mapXo=undefined, mapYo=undefined} = this.map_coords() ); 
 					if (mapX !== undefined) { this.coord_x = mapX; }
 					if (mapY !== undefined) { this.coord_y = mapY; }
 					if (mapXo !== undefined) { this.orig_x = mapXo; }
 					if (mapYo !== undefined) { this.orig_y = mapYo; }
 				}
 		
+
+				if (this.map_col) { 
+					let c = this.map_col() ; 
+					this.line_col = "rgb(" + c + ")"; 			// vector line colour
+					this.circle_col = "rgba(" + c + ",0.1)";    // draggable area colour
+				}
+
 				this.x = parent.canvas.width  * (0.5 + (this.coord_x + this.orig_x)/parent.grid_res)/parent.scale;
 				this.y = parent.canvas.height * (0.5 - (this.coord_y + this.orig_y)/parent.grid_res)/parent.scale;
 

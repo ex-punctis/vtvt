@@ -4,14 +4,16 @@ vtvt is an interactive tool for visualizing vectors and their transformations in
 
 <img src="https://raw.githubusercontent.com/ex-punctis/vtvt/master/unit-circle-demo.gif" height="275" width="252">
 
-Current version: 1.02 (2019-02-18)
+Current version: 1.03 (2019-04-22)
 
-**Note on compatibility with v1.01:** a vector mapping function should now return an object rather than an array of coordinates! Sorry for the inconvenience, but this change had to be done. 
+**Note on compatibility with v1.02:**
+
+Coordinate mapping function property is now called `map_coords` (previously, `mapping`) 
 
 ## Features
 - displays custom vectors, lines and points;
 - supports object dragging (mouse or touch gestures);
-- supports custom vector mapping (i.e. you can make a vector update itself continuously based on other vectors);
+- supports custom vector mapping (i.e. you can make a vector update its coordinates and colour in every frame based on some inputs, e.g. coordinates of other vectors);
 - built-in calculation and display of eigenvectors;
 - can display an animated sequence of vectors (multiple vectors per frame are allowed);
 - multi-platform support (tested with the following operating systems: MacOS Sierra, Windows 10, Ubuntu 16.04, iOS 12, Raspbian Stretch[rpi3]).
@@ -101,14 +103,15 @@ To add vectors that are always rendered use the following method:
 | draw_point | false | (applies if kind: 'custom') draw a point at [coord_x, coord_y]? |
 | draw_stem | true | (applies if kind: 'custom') draw the vector stem? |
 | draw_line | false | (applies if kind: 'custom') draw a line across the whole screen? |
-| mapping | undefined | a function mapping vector coordinates (refer to the following section for details) | 
+| map_coords | undefined | a function mapping vector coordinates (refer to the following section for details) | 
+| map_col | undefined | a function mapping vector colour (refer to the following section for details) | 
 
 Example:
 
 ```javascript
 scene.addVector({
     coords: [-1, 3], c: "250, 200, 200", label: "m = t1+t2", visible: true, 
-    mapping: function(){ 
+    map_coords: function(){ 
         return {mapX: scene.vectors[0].coord_x + scene.vectors[1].coord_x, 
                 mapY: scene.vectors[0].coord_y + scene.vectors[1].coord_y};
     } 
@@ -120,7 +123,7 @@ scene.addVector({
 
 ### Specifying a mapping function 
 
-If you want to update a vector based on other vectors, this can be done by specifying a mapping function that returns the following object:
+If you want to update a vector's coordinates based on other vectors, this can be done by specifying a mapping function that returns the following object:
 
 ```
 {
@@ -157,7 +160,9 @@ scene.vectors[1].mapping = function() {
 }
 ```
 
-Please refer to the demo files for additional examples of specifying the mapping function.
+It is also possible to map a vector's colour to some inputs. For that you'll need a function that returns `\`${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)}\`;`, where red, green and blue are some variables that range from 0 to 255. Rounding of float values is necessary to avoid issues in some browsers.
+
+Please refer to the demo files for additional examples of specifying the mapping functions (demo #8 for colour mapping).
 
 ### Adding vectors to the animated sequence:
 
@@ -179,7 +184,7 @@ You can access the k-th animated vector's coordinates in the i-th frame with `<s
 Example:
 
 ```javascript
-scene.addAnimationFrame([{coords: [1, 1], c: "150, 100, 100", label: "iter0", mapping: function(){ 
+scene.addAnimationFrame([{coords: [1, 1], c: "150, 100, 100", label: "iter0", map_coords: function(){ 
     return {mapX: scene.vectors[2].coord_x, mapY: scene.vectors[2].coord_y} }]);
 ```
 

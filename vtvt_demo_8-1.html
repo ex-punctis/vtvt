@@ -49,7 +49,7 @@
     </div></div>
     <div class="slidercontainer"><div style=“display:inline-block;”></div>
         <label for="lSlider"">L: </label>
-        <input type="range" id="lSlider" min="0.5" max="7.9" value="4" step="0.1" class="slider">
+        <input type="range" id="lSlider" min="0.5" max="9.9" value="4" step="0.1" class="slider">
         <label for="lSlider" id="lValue" ">4.0</label>
     </div></div>
 
@@ -88,35 +88,41 @@
         // initialize the scene
         var scene = new vtvt({canvas_id: "vector_canvas", grid_res: 16, circle_rad: 0.8, point_rad: 0.07, show_matrix: false, show_eig: false, frame_duration: 0, anim_trigger_id: "animation_trigger"});
 
-        // add starting point
-        scene.addVector({
-            coords: [Math.random()*16-8,Math.random()*16-8],
-            //c: '60,50,230', 
-            c:'0,0,0',
-            draggable: true, 
-            kind: 'point',
-            visible: true,
-            label: ['(θ',String.fromCharCode(48+8272),', ', 'θ\′', String.fromCharCode(48+8272), ')'].join('')
-        }); 
+        // number of starting points
+        var numPoints = 3;
+        var colours=['60,50,230','40,170,40','200,50,50'];
+        // add points
+        for (let i = 0; i < numPoints; i+=1) {  
+            // add point
+            scene.addVector({
+                coords: [Math.random()*16-8,Math.random()*16-8],
+                c: colours[i], 
+                draggable: true, 
+                kind: 'point',
+                visible: true,
+                label: ['(θ',String.fromCharCode(i+48+8272),', ', 'θ\′', String.fromCharCode(i+48+8272), ')'].join('')
+            }); 
+        }
         
-        // add starting pendulum
-        scene.addVector({
-            c: '140,140,140', 
-            draggable: false, 
-            kind: 'custom',
-            draw_arrow: false,
-            draw_point: true,
-            draw_stem: true,
-            draw_line: false,
-            visible: true,
-            label: ['L(sin θ', String.fromCharCode(48+8272), ', ', '-cos θ', String.fromCharCode(48+8272), ')'].join(''),
-            map_coords: function () {
-                return {
-                    mapX: l*Math.sin(scene.vectors[0].coord_x),
-                    mapY: -l*Math.cos(scene.vectors[0].coord_x)
-                };
-            }
-        }); 
+        for (let i = 0; i < numPoints; i+=1) {  
+            scene.addVector({
+                c: colours[i], 
+                draggable: false, 
+                kind: 'custom',
+                draw_arrow: false,
+                draw_point: true,
+                draw_stem: true,
+                draw_line: false,
+                visible: true,
+                label: ['L(sin θ', String.fromCharCode(i+48+8272), ', ', '-cos θ', String.fromCharCode(i+48+8272), ')'].join(''),
+                map_coords: function () {
+                    return {
+                        mapX: l*Math.sin(scene.vectors[i].coord_x),
+                        mapY: -l*Math.cos(scene.vectors[i].coord_x)
+                    };
+                }
+            }); 
+        }
 
         // add axis labels using invisible vectors (a hack)
         scene.addVector({
@@ -178,47 +184,22 @@
         }
 
                         
-        // add animation vectors
-        scene.addAnimationFrame([
-            {
-                //c: '60,50,230',
-                c:'0,0,0', 
-                kind: 'point', 
-                map_coords:function() {
-                    return {mapX: scene.vectors[0].coord_x,
-                            mapY: scene.vectors[0].coord_y };
-                    } 
-            }, {
-                c: '0,0,0', 
-                draggable: false, 
-                kind: 'custom',
-                draw_arrow: false,
-                draw_point: true,
-                draw_stem: true,
-                draw_line: false,
-                visible: true,
-                //label: ['L(sin θ', String.fromCharCode(48+8272), ', ', '-cos θ', String.fromCharCode(48+8272), ')'].join(''),
-                map_coords: function () {
-                    return {mapX: l*Math.sin(scene.vectors[0].coord_x),
-                            mapY: -l*Math.cos(scene.vectors[0].coord_x) };
-                    }
-            }
-        ]); 
-
-
-        for (let i = 1; i<2000; i++) {
-            scene.addAnimationFrame([
-                {
-                    c: '0,0,0', 
+            // add animation vectors
+            let tempArr=[];
+            for (let i = 0; i < numPoints; i+=1) { 
+                tempArr.push( {
+                    c: colours[i], 
                     kind: 'point', 
-                    map_coords: function() {
-                        let x = scene.vectors_animated[i-1][0].coord_x;
-                        let y = scene.vectors_animated[i-1][0].coord_y;
-                        return {mapX: x + y*step, 
-                                mapY: y - (mu*y + g/l*Math.sin(x))*step }
-                    }    
-                }, {
-                    c: '0,0,0', 
+                    map_coords:function() {
+                        return {mapX: scene.vectors[i].coord_x,
+                                mapY: scene.vectors[i].coord_y };
+                        } 
+                    } 
+                );
+            }
+            for (let i = 0; i < numPoints; i+=1) {
+                tempArr.push({
+                    c: colours[i], 
                     draggable: false, 
                     kind: 'custom',
                     draw_arrow: false,
@@ -226,18 +207,59 @@
                     draw_stem: true,
                     draw_line: false,
                     visible: true,
-                    //label: ['L(sin θ', String.fromCharCode(48+8272), ', ', 'cos θ', String.fromCharCode(48+8272), ')'].join(''),
+                    label: ['L(sin θ', String.fromCharCode(i+48+8272), ', ', '-cos θ', String.fromCharCode(i+48+8272), ')'].join(''),
                     map_coords: function () {
-                        let x = scene.vectors_animated[i-1][0].coord_x;
-                        let y = scene.vectors_animated[i-1][0].coord_y;
-                        return {mapX: l*Math.sin(x + y*step),
-                                mapY: -l*Math.cos(x + y*step) };
+                        return {mapX: l*Math.sin(scene.vectors[i].coord_x),
+                                mapY: -l*Math.cos(scene.vectors[i].coord_x) };
                         }
-                }
-            ]);
-        }
+                    }
+                ); 
+            }
 
-        
+            scene.addAnimationFrame(tempArr); 
+
+            for (let i = 1; i<2000; i++) {
+                let tempArr=[];
+                for (let j = 0; j < numPoints; j+=1) {
+                    tempArr.push( {
+                        c: colours[j], 
+                        kind: 'point', 
+                        map_coords: function() {
+                            let x = scene.vectors_animated[i-1][j].coord_x;
+                            let y = scene.vectors_animated[i-1][j].coord_y;
+                            return {mapX: x + y*step, 
+                                    mapY: y - (mu*y + g/l*Math.sin(x))*step }
+                        }    
+                    } );
+                }
+                
+                for (let j = 0; j < numPoints; j+=1) {
+                    tempArr.push({
+                        c: colours[j], 
+                        draggable: false, 
+                        kind: 'custom',
+                        draw_arrow: false,
+                        draw_point: true,
+                        draw_stem: true,
+                        draw_line: false,
+                        visible: true,
+                        label: ['L(sin θ', String.fromCharCode(j+48+8272), ', ', 'cos θ', String.fromCharCode(j+48+8272), ')'].join(''),
+                        map_coords: function () {
+                            let x = scene.vectors_animated[i-1][j].coord_x;
+                            let y = scene.vectors_animated[i-1][j].coord_y;
+                            return {mapX: l*Math.sin(x + y*step),
+                                    mapY: -l*Math.cos(x + y*step) };
+                            }
+                    } ); 
+                }
+
+                scene.addAnimationFrame(tempArr);
+            }
+
+            
+
+
+
 
         // render
         scene.render();

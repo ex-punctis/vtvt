@@ -31,7 +31,7 @@
         
         // add the first animated vector (mapped to iter0)
         scene4.addAnimationFrame([{coords: [-6, 1], c: "100, 220, 170", label: "iter0", 
-            mapping: function(){ return {mapX: scene4.vectors[2].coord_x, mapY: scene4.vectors[2].coord_y} } }]);
+            map_coords: function(){ return {mapX: scene4.vectors[2].coord_x, mapY: scene4.vectors[2].coord_y} } }]);
     
         // add additional animated vectors (each mapped to the previous one)
         for (let k = 0; k < 20; k++) {
@@ -44,7 +44,7 @@
                 return {mapX: x / norm * 4, mapY: y = y / norm * 4};
             }	
             // add vector to the animation sequence
-            scene4.addAnimationFrame([ {coords: [1, 1], c: "100, 220, 170", label: `iter${k+1}`, kind: 'custom', draw_line: true, mapping: map_func} ]);
+            scene4.addAnimationFrame([ {coords: [1, 1], c: "100, 220, 170", label: `iter${k+1}`, kind: 'custom', draw_line: true, map_coords: map_func} ]);
         }
 
         // render

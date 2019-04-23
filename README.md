@@ -219,6 +219,12 @@ v1.02 2019-02-18
     - mapping function should now return an object instead of an array
 - updated demos
 
+v1.03 2019-04-22
+- updated readme
+- class Vector:
+    - renamed mapping function property (`mapping` -> `map_coords`)
+    - added colour mapping (property: `map_col`)
+
 ## Things to do in the future
 
 - add grid transformation

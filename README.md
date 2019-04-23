@@ -160,7 +160,7 @@ scene.vectors[1].mapping = function() {
 }
 ```
 
-It is also possible to map a vector's colour to some inputs. For that you'll need a function that returns `\`${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)}\`;`, where red, green and blue are some variables that range from 0 to 255. Rounding of float values is necessary to avoid issues in some browsers.
+It is also possible to map a vector's colour to some inputs. For that you'll need a function that returns `` `${Math.round(red)}, ${Math.round(green)}, ${Math.round(blue)}\`;``, where red, green and blue are some variables that range from 0 to 255. Rounding of float values is necessary to avoid issues in some browsers.
 
 Please refer to the demo files for additional examples of specifying the mapping functions (demo #8 for colour mapping).
 
